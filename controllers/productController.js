@@ -14,6 +14,8 @@ const createProduct = asyncHandler(async (req, res) => {
   }
 
   const product = await Product.create({
+    // Add the user that created the product
+    user: req.user.id,
     name: req.body.name,
     sku: req.body.sku,
     category: req.body.category,
@@ -25,7 +27,7 @@ const createProduct = asyncHandler(async (req, res) => {
 });
 
 const getProducts = asyncHandler(async (req, res) => {
-  const product = await Product.find();
+  const product = await Product.find({ user: req.user.id });
   res.status(200).json(product);
 });
 
@@ -33,6 +35,10 @@ const getProduct = asyncHandler(async (req, res) => {
   const product = await Product.findById(req.params.id);
   if (!product) {
     return res.status(404).json(`No product with id : ${id}`);
+  }
+  if (product.user.toString() !== req.user.id) {
+    res.status(401);
+    throw new Error("User not authorized");
   }
   res.status(200).json(product);
 });
@@ -43,6 +49,12 @@ const updateProduct = asyncHandler(async (req, res) => {
 
   if (!product) {
     return res.status(404).json(`No product with id : ${id}`);
+  }
+
+  // Match product with its user
+  if (product.user.toString() !== req.user.id) {
+    res.status(401);
+    throw new Error("User not authorized");
   }
 
   const updatedProduct = await Product.findByIdAndUpdate(
@@ -59,6 +71,11 @@ const updateProduct = asyncHandler(async (req, res) => {
 
 const deleteProduct = asyncHandler(async (req, res) => {
   const product = await Product.findById(req.params.id);
+  // Match product with its user
+  if (product.user.toString() !== req.user.id) {
+    res.status(401);
+    throw new Error("User not authorized");
+  }
   await product.remove();
   res.status(200).json(product);
 });
