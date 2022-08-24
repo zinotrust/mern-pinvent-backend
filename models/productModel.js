@@ -38,6 +38,7 @@ const productSchema = mongoose.Schema(
       type: String,
       required: [true, "Please add a description"],
     },
+    images: [Object],
   },
   {
     timestamps: true,

@@ -13,6 +13,30 @@ const createProduct = asyncHandler(async (req, res) => {
     throw new Error("Please fill in all fields");
   }
 
+  // Handle Files upload
+  let filesArray = [];
+  req.files.forEach((element) => {
+    const file = {
+      fileName: element.originalname,
+      filePath: element.path,
+      fileType: element.mimetype,
+      fileSize: fileSizeFormatter(element.size, 2),
+    };
+    filesArray.push(file);
+  });
+
+  // const product = new Product({
+  //   user: req.user.id,
+  //   name: req.body.name,
+  //   sku: req.body.sku,
+  //   category: req.body.category,
+  //   quantity: req.body.quantity,
+  //   price: req.body.price,
+  //   description: req.body.description,
+  //   files: filesArray,
+  // })
+  // await product.save()
+
   const product = await Product.create({
     // Add the user that created the product
     user: req.user.id,
@@ -22,6 +46,7 @@ const createProduct = asyncHandler(async (req, res) => {
     quantity: req.body.quantity,
     price: req.body.price,
     description: req.body.description,
+    images: filesArray,
   });
   res.status(200).json(product);
 });
@@ -79,6 +104,18 @@ const deleteProduct = asyncHandler(async (req, res) => {
   await product.remove();
   res.status(200).json(product);
 });
+
+const fileSizeFormatter = (bytes, decimal) => {
+  if (bytes === 0) {
+    return "0 Bytes";
+  }
+  const dm = decimal || 2;
+  const sizes = ["Bytes", "KB", "MB", "GB", "TB", "PB", "EB", "YB", "ZB"];
+  const index = Math.floor(Math.log(bytes) / Math.log(1000));
+  return (
+    parseFloat((bytes / Math.pow(1000, index)).toFixed(dm)) + " " + sizes[index]
+  );
+};
 
 module.exports = {
   createProduct,
