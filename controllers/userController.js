@@ -108,7 +108,6 @@ const loginUser = asyncHandler(async (req, res) => {
       name: user.name,
       email: user.email,
       photo: user.photo,
-      photo: user.photo,
       token,
     });
   } else {
@@ -117,8 +116,21 @@ const loginUser = asyncHandler(async (req, res) => {
   }
 });
 
+// Check if a use is logged in with HTTP only cookie
+const loginStatus = asyncHandler(async (req, res) => {
+  const token = req.cookies.token;
+  if (!token) {
+    return res.json(false);
+  }
+  const verified = jwt.verify(token, process.env.JWT_SECRET);
+  if (verified) {
+    return res.send(true);
+  }
+  return res.json(false);
+});
+
 // Logout
-const logout = async (req, res) => {
+const logout = asyncHandler(async (req, res) => {
   res.cookie("token", "", {
     httpOnly: true,
     expires: new Date(0),
@@ -126,10 +138,10 @@ const logout = async (req, res) => {
     sameSite: "none",
   });
   return res.status(200).json({ message: "Successfully Logged Out" });
-};
+});
 
 // Forgot Password
-const forgotPassword = async (req, res) => {
+const forgotPassword = asyncHandler(async (req, res) => {
   const { email } = req.body;
   const user = await User.findOne({ email });
 
@@ -161,7 +173,7 @@ const forgotPassword = async (req, res) => {
   }).save();
 
   // Reset url
-  const resetUrl = `${clientURL}/passwordreset/${resetToken}`;
+  const resetUrl = `${clientURL}/resetpassword/${resetToken}`;
 
   // Reset Email
   const message = `
@@ -180,10 +192,13 @@ const forgotPassword = async (req, res) => {
     res.status(500);
     throw new Error("Something went Wrong. Please try again");
   }
-};
+});
 
-const resetPassword = async (req, res) => {
+const resetPassword = asyncHandler(async (req, res) => {
   const { resetToken } = req.params;
+  const { password } = req.body;
+  // console.log(password);
+  // return console.log(resetToken);
 
   // Compare token in URL params to hashed token
   const resetPasswordToken = crypto
@@ -205,12 +220,12 @@ const resetPassword = async (req, res) => {
 
   // Find User
   const user = await User.findOne({ _id: userToken.userId });
-  user.password = req.body.password;
+  user.password = password;
   await user.save();
   res.status(201).json({
     message: "Password Reset Successful, Please Login",
   });
-};
+});
 
 const updateUser = asyncHandler(async (req, res) => {
   const user = await User.findById(req.user._id);
@@ -246,4 +261,5 @@ module.exports = {
   logout,
   forgotPassword,
   resetPassword,
+  loginStatus,
 };

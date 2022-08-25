@@ -7,11 +7,13 @@ const {
   logout,
   forgotPassword,
   resetPassword,
+  loginStatus,
 } = require("../controllers/userController");
 const protect = require("../middleware/authMiddleware");
 
 router.post("/register", registerUser);
 router.post("/login", loginUser);
+router.get("/loggedIn", loginStatus);
 router.post("/profile", protect, updateUser);
 router.get("/logout", logout);
 router.post("/forgotpassword", forgotPassword);
