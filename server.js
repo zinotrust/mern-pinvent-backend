@@ -4,6 +4,7 @@ const mongoose = require("mongoose");
 const cors = require("cors");
 const userRoute = require("./routes/userRoute");
 const productRoute = require("./routes/productRoute");
+const contactRoute = require("./routes/contactRoute");
 const errorHandler = require("./middleware/errorMiddleware");
 const path = require("path");
 const bodyParser = require("body-parser");
@@ -17,6 +18,9 @@ app.use(express.json());
 app.use(cookieParser());
 app.use(express.urlencoded({ extended: false }));
 app.use(bodyParser.json());
+// app.use(bodyParser.text());
+// app.use(bodyParser.urlencoded({ extended: true, limit: "50mb" }));
+
 app.use("/uploads", express.static(path.join(__dirname, "uploads")));
 // Fix Cors
 app.use(
@@ -29,6 +33,7 @@ app.use(
 // Routes Middleware
 app.use("/api/users", userRoute);
 app.use("/api/products", productRoute);
+app.use("/api/", contactRoute);
 
 // Routes
 app.get("/", (req, res) => {

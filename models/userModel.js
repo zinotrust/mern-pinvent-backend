@@ -25,8 +25,16 @@ const userSchema = mongoose.Schema(
     photo: {
       type: String,
       required: [true, "Please add a photo"],
-      default:
-        "https://icon-library.com/images/anonymous-avatar-icon/anonymous-avatar-icon-25.jpg",
+      default: "https://i.ibb.co/4pDNDk1/avatar.png",
+    },
+    phone: {
+      type: String,
+      default: "",
+    },
+    bio: {
+      type: String,
+      maxLength: [250, "Password must not be more than 250 characters"],
+      default: "",
     },
   },
   {

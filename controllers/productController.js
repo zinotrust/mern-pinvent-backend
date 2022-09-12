@@ -2,6 +2,7 @@ const Product = require("../models/productModel");
 const asyncHandler = require("express-async-handler");
 
 const createProduct = asyncHandler(async (req, res) => {
+  // return console.log(req.body);
   if (
     !req.body.name ||
     !req.body.category ||
@@ -14,16 +15,25 @@ const createProduct = asyncHandler(async (req, res) => {
   }
 
   // Handle Files upload
-  let filesArray = [];
-  req.files.forEach((element) => {
-    const file = {
-      fileName: element.originalname,
-      filePath: element.path,
-      fileType: element.mimetype,
-      fileSize: fileSizeFormatter(element.size, 2),
+  let fileData = {};
+  if (req.file) {
+    fileData = {
+      fileName: req.file.originalname,
+      filePath: req.file.path,
+      fileType: req.file.mimetype,
+      fileSize: fileSizeFormatter(req.file.size, 2),
     };
-    filesArray.push(file);
-  });
+  }
+  // let filesArray = [];
+  // req.files.forEach((element) => {
+  //   const file = {
+  //     fileName: element.originalname,
+  //     filePath: element.path,
+  //     fileType: element.mimetype,
+  //     fileSize: fileSizeFormatter(element.size, 2),
+  //   };
+  //   filesArray.push(file);
+  // });
 
   // const product = new Product({
   //   user: req.user.id,
@@ -46,13 +56,13 @@ const createProduct = asyncHandler(async (req, res) => {
     quantity: req.body.quantity,
     price: req.body.price,
     description: req.body.description,
-    images: filesArray,
+    image: fileData,
   });
   res.status(200).json(product);
 });
 
 const getProducts = asyncHandler(async (req, res) => {
-  const product = await Product.find({ user: req.user.id });
+  const product = await Product.find({ user: req.user.id }).sort("-createdAt");
   res.status(200).json(product);
 });
 
@@ -68,9 +78,23 @@ const getProduct = asyncHandler(async (req, res) => {
   res.status(200).json(product);
 });
 
+// Update Product
 const updateProduct = asyncHandler(async (req, res) => {
   const { id } = req.params;
+  console.log(id);
+  // return console.log(req.body);
   const product = await Product.findById(id);
+
+  // Handle Files upload
+  let fileData = {};
+  if (req.file) {
+    fileData = {
+      fileName: req.file.originalname,
+      filePath: req.file.path,
+      fileType: req.file.mimetype,
+      fileSize: fileSizeFormatter(req.file.size, 2),
+    };
+  }
 
   if (!product) {
     return res.status(404).json(`No product with id : ${id}`);
@@ -84,7 +108,14 @@ const updateProduct = asyncHandler(async (req, res) => {
 
   const updatedProduct = await Product.findByIdAndUpdate(
     { _id: id },
-    req.body,
+    {
+      name: req.body.name,
+      category: req.body.category,
+      quantity: req.body.quantity,
+      price: req.body.price,
+      description: req.body.description,
+      image: fileData || product.image,
+    },
     {
       new: true,
       runValidators: true,
@@ -96,6 +127,11 @@ const updateProduct = asyncHandler(async (req, res) => {
 
 const deleteProduct = asyncHandler(async (req, res) => {
   const product = await Product.findById(req.params.id);
+  // If product doesnt exist
+  if (!product) {
+    res.status(404);
+    throw new Error("Product not found.");
+  }
   // Match product with its user
   if (product.user.toString() !== req.user.id) {
     res.status(401);

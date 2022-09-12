@@ -1,18 +1,22 @@
 const nodemailer = require("nodemailer");
 
-const sendEmail = async (email, subject, message) => {
+const sendEmail = async (subject, message, send_to, sent_from, reply_to) => {
   const transporter = nodemailer.createTransport({
-    host: "smtp-mail.outlook.com",
+    host: process.env.EMAIL_HOST,
     port: 587,
     auth: {
-      user: "nodecourse@outlook.com",
-      pass: "#Pacino453asdf#Outlook",
+      user: process.env.EMAIL_USER,
+      pass: process.env.EMAIL_PASS,
+    },
+    tls: {
+      rejectUnauthorized: false,
     },
   });
 
   const options = {
-    from: "nodecourse@outlook.com",
-    to: email,
+    from: sent_from,
+    to: send_to,
+    replyTo: reply_to,
     subject: subject,
     html: message,
   };

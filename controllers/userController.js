@@ -18,7 +18,7 @@ const generateToken = (id) => {
 };
 
 const registerUser = asyncHandler(async (req, res) => {
-  const { name, email, password, photo } = req.body;
+  const { name, email, password } = req.body;
 
   // Validation
   if (!name || !email || !password) {
@@ -44,6 +44,8 @@ const registerUser = asyncHandler(async (req, res) => {
     email,
     password,
     photo,
+    phone,
+    bio,
   });
 
   const token = generateToken(user._id);
@@ -63,6 +65,8 @@ const registerUser = asyncHandler(async (req, res) => {
       name: user.name,
       email: user.email,
       photo: user.photo,
+      phone: user.phone,
+      bio: user.bio,
       token,
     });
   } else {
@@ -83,7 +87,7 @@ const loginUser = asyncHandler(async (req, res) => {
 
   // Check DB if user exists
   const user = await User.findOne({ email });
-  console.log(user);
+  // console.log(user);
 
   if (!user) {
     res.status(400);
@@ -186,7 +190,11 @@ const forgotPassword = asyncHandler(async (req, res) => {
     `;
 
   try {
-    await sendEmail(user.email, "Password Reset Request", message);
+    const subject = "Password Reset Request";
+    const send_to = user.email;
+    const sent_from = process.env.EMAIL_USER;
+
+    await sendEmail(subject, message, send_to, sent_from);
     res.status(200).json({ success: true, message: "Reset Email Sent" });
   } catch (error) {
     res.status(500);
@@ -227,13 +235,36 @@ const resetPassword = asyncHandler(async (req, res) => {
   });
 });
 
-const updateUser = asyncHandler(async (req, res) => {
+const getUser = asyncHandler(async (req, res) => {
   const user = await User.findById(req.user._id);
   console.log(user);
 
   if (user) {
-    user.name = req.body.name || user.name;
+    res.json({
+      _id: user._id,
+      name: user.name,
+      email: user.email,
+      photo: user.photo,
+      phone: user.phone,
+      bio: user.bio,
+    });
+  } else {
+    res.status(404);
+    throw new Error("User Not Found");
+  }
+});
+
+// Update User
+const updateUser = asyncHandler(async (req, res) => {
+  const user = await User.findById(req.user._id);
+  // console.log(user);
+  // return console.log(req.body);
+
+  if (user) {
     user.email = user.email;
+    user.name = req.body.name || user.name;
+    user.phone = req.body.phone || user.phone;
+    user.bio = req.body.bio || user.bio;
     user.photo = req.body.photo || user.photo;
     if (req.body.password) {
       user.password = req.body.password;
@@ -246,6 +277,8 @@ const updateUser = asyncHandler(async (req, res) => {
       name: updatedUser.name,
       email: updatedUser.email,
       photo: updatedUser.photo,
+      phone: updatedUser.phone,
+      bio: updatedUser.bio,
       token: generateToken(updatedUser._id),
     });
   } else {
@@ -254,10 +287,48 @@ const updateUser = asyncHandler(async (req, res) => {
   }
 });
 
+// Change Password
+const changePassword = asyncHandler(async (req, res) => {
+  const user = await User.findById(req.user._id);
+  const { oldPassword, password } = req.body;
+
+  if (!user) {
+    res.status(400);
+    throw new Error("User not found, please signup.");
+  }
+
+  // Validate Request
+  if (!oldPassword || !password) {
+    res.status(400);
+    throw new Error("Please add old and new password");
+  }
+  // if (password.length < 6) {
+  //   res.status(400);
+  //   throw new Error("New password must be up to 6 characters");
+  // }
+
+  // User exists, now Check if password is correct
+  const passwordIsCorrect = await bcrypt.compare(oldPassword, user.password);
+
+  // if password is correct, save new password
+  if (user && passwordIsCorrect) {
+    user.password = req.body.password;
+
+    await user.save();
+
+    res.status(200).send("Password change successful");
+  } else {
+    res.status(404);
+    throw new Error("Old password is incorrect");
+  }
+});
+
 module.exports = {
   registerUser,
   loginUser,
+  getUser,
   updateUser,
+  changePassword,
   logout,
   forgotPassword,
   resetPassword,
