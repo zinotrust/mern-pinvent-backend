@@ -102,8 +102,8 @@ const loginUser = asyncHandler(async (req, res) => {
     path: "/",
     httpOnly: false,
     expires: new Date(Date.now() + 1000 * 86400), // 1 day
-    // secure: true,
-    // sameSite: "lax",
+    sameSite: "none",
+    secure: true,
   });
 
   if (user && passwordIsCorrect) {
