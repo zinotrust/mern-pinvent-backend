@@ -100,7 +100,7 @@ const loginUser = asyncHandler(async (req, res) => {
   // Send the HTTP-only cookie
   res.cookie("token", token, {
     path: "/",
-    httpOnly: true,
+    httpOnly: false,
     expires: new Date(Date.now() + 1000 * 86400), // 1 day
     // secure: true,
     // sameSite: "lax",
