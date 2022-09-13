@@ -18,14 +18,12 @@ app.use(express.json());
 app.use(cookieParser());
 app.use(express.urlencoded({ extended: false }));
 app.use(bodyParser.json());
-// app.use(bodyParser.text());
-// app.use(bodyParser.urlencoded({ extended: true, limit: "50mb" }));
 
 app.use("/uploads", express.static(path.join(__dirname, "uploads")));
 // Fix Cors
 app.use(
   cors({
-    origin: ["http://localhost:3000", "https://mern-inventory.netlify.app"],
+    origin: ["http://localhost:3000", "https://pinvent.onrender.com"],
     credentials: true,
   })
 );
