@@ -23,14 +23,12 @@ app.use("/uploads", express.static(path.join(__dirname, "uploads")));
 // Fix Cors
 app.use(
   cors({
-    origin: [
-      "http://localhost:3000",
-      "https://pinvent.onrender.com",
-      "https://pinvent.vercel.app",
-    ],
+    origin: ["http://localhost:3000", "https://pinvent.vercel.app"],
     credentials: true,
   })
 );
+// Save cookie from server proxy
+// app.set("trust proxy", 1);
 
 // Routes Middleware
 app.use("/api/users", userRoute);
