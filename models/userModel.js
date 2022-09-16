@@ -29,12 +29,12 @@ const userSchema = mongoose.Schema(
     },
     phone: {
       type: String,
-      default: "",
+      default: "+234",
     },
     bio: {
       type: String,
       maxLength: [250, "Password must not be more than 250 characters"],
-      default: "",
+      default: "bio",
     },
   },
   {
