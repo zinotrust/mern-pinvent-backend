@@ -1,5 +1,7 @@
 const Product = require("../models/productModel");
 const asyncHandler = require("express-async-handler");
+const cloudinary = require("cloudinary").v2;
+// console.log(cloudinary.config().cloud_name);
 
 const createProduct = asyncHandler(async (req, res) => {
   // return console.log(req.body);
@@ -17,9 +19,21 @@ const createProduct = asyncHandler(async (req, res) => {
   // Handle Files upload
   let fileData = {};
   if (req.file) {
+    // Save to cloudinary
+    let uploadedFile;
+    try {
+      uploadedFile = await cloudinary.uploader.upload(req.file.path, {
+        folder: "Pinvent",
+        resource_type: "image",
+      });
+    } catch (error) {
+      res.status(500);
+      throw new Error("Image could not be uploaded.");
+    }
+
     fileData = {
       fileName: req.file.originalname,
-      filePath: req.file.path,
+      filePath: uploadedFile.secure_url,
       fileType: req.file.mimetype,
       fileSize: fileSizeFormatter(req.file.size, 2),
     };
@@ -88,9 +102,20 @@ const updateProduct = asyncHandler(async (req, res) => {
   // Handle Files upload
   let fileData = {};
   if (req.file) {
+    // Save to cloudinary
+    let uploadedFile;
+    try {
+      uploadedFile = await cloudinary.uploader.upload(req.file.path, {
+        folder: "Pinvent",
+        resource_type: "image",
+      });
+    } catch (error) {
+      res.status(500);
+      throw new Error("Image could not be uploaded.");
+    }
     fileData = {
       fileName: req.file.originalname,
-      filePath: req.file.path,
+      filePath: uploadedFile.secure_url,
       fileType: req.file.mimetype,
       fileSize: fileSizeFormatter(req.file.size, 2),
     };
