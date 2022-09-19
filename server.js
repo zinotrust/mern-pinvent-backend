@@ -1,13 +1,13 @@
 const dotenv = require("dotenv").config();
 const express = require("express");
 const mongoose = require("mongoose");
+const bodyParser = require("body-parser");
 const cors = require("cors");
 const userRoute = require("./routes/userRoute");
 const productRoute = require("./routes/productRoute");
 const contactRoute = require("./routes/contactRoute");
 const errorHandler = require("./middleware/errorMiddleware");
 const path = require("path");
-const bodyParser = require("body-parser");
 // Import cookie parser
 const cookieParser = require("cookie-parser");
 
@@ -18,13 +18,6 @@ app.use(express.json());
 app.use(cookieParser());
 app.use(express.urlencoded({ extended: false }));
 app.use(bodyParser.json());
-// const cloudinary = require("cloudinary").v2;
-
-// cloudinary.config({
-//   cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
-//   api_key: process.env.CLOUDINARY_API_KEY,
-//   api_secret: process.env.CLOUDINARY_API_SECRET,
-// });
 
 app.use("/uploads", express.static(path.join(__dirname, "uploads")));
 // Fix Cors
