@@ -139,7 +139,7 @@ const updateProduct = asyncHandler(async (req, res) => {
       quantity: req.body.quantity,
       price: req.body.price,
       description: req.body.description,
-      image: fileData || product.image,
+      image: Object.keys(fileData).length === 0 ? product.image : fileData,
     },
     {
       new: true,
